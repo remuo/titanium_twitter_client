@@ -87,7 +87,7 @@ function createHeader(method, api, omake) {
 	var base_string = method + '&' + encodeURIComponent(api) + '&' + encodeURIComponent('oauth_consumer_key=' +　consumer_key + '&oauth_nonce=' + nonce + '&oauth_signature_method=HMAC-SHA1&oauth_timestamp=' + d + '&oauth_token=' + access_token + '&oauth_version=1.0' + omake);
 	b64pad = '=';
 	var signature = encodeURIComponent(b64_hmac_sha1(consumer_secret + '&' + access_token_secret, base_string));
-	var header = 'OAuth oauth_consumer_key="' +　consumer_key + '", oauth_nonce="' + nonce + '", oauth_signature="' + signature + '", oauth_signature_method="HMAC-SHA1", oauth_timestamp="' + d + '", oauth_token="' + access_token + '", oauth_version="1.0"';
+	var header = 'OAuth oauth_consumer_key="' + consumer_key + '", oauth_nonce="' + nonce + '", oauth_signature="' + signature + '", oauth_signature_method="HMAC-SHA1", oauth_timestamp="' + d + '", oauth_token="' + access_token + '", oauth_version="1.0"';
 	Ti.API.info(base_string);
 	Ti.API.info(header);
 	return header;
