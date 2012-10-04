@@ -32,19 +32,6 @@ var access_token = '856356996-K7MFEJvjXCG4AMvIrY2Nw9mSw0BwKQoNBGkfCFxR';
 var access_token_secret = 'Ub9dv17MxL6tNElvnta8oI2jeks7Uz8W1M6Aes01MCU';
 //
 
-function createHeader(method, api, omake) {
-	var d = parseInt((new Date)/1000);
-	var nonce = hex_sha1(parseInt(d + Math.random() * 100));
-	
-	var base_string = method + '&' + encodeURIComponent(api) + '&' + encodeURIComponent('oauth_consumer_key=' +　consumer_key + '&oauth_nonce=' + nonce + '&oauth_signature_method=HMAC-SHA1&oauth_timestamp=' + d + '&oauth_token=' + access_token + '&oauth_version=1.0' + omake);
-	b64pad = '=';
-	var signature = encodeURIComponent(b64_hmac_sha1(consumer_secret + '&' + access_token_secret, base_string));
-	var header = 'OAuth oauth_consumer_key="' +　consumer_key + '", oauth_nonce="' + nonce + '", oauth_signature="' + signature + '", oauth_signature_method="HMAC-SHA1", oauth_timestamp="' + d + '", oauth_token="' + access_token + '", oauth_version="1.0"';
-	Ti.API.info(base_string);
-	Ti.API.info(header);
-	return header;
-}
-
 var method = 'GET';
 var api = 'https://api.twitter.com/1.1/statuses/home_timeline.json';	
 
@@ -69,43 +56,59 @@ http.send();
 
 // tableViewがクリックされたら日付をtweetしてtableViewに追加する
 tableView.addEventListener('click', function (ev) {
-	var method = 'POST';
-	var api = 'https://api.twitter.com/1.1/statuses/update.json';
-	var d = new Date();
-	var status = String.format('%s%s%s', addZero(d.getHours()), addZero(d.getMinutes()), addZero(d.getSeconds()));
-	var param = {
-		'status': status
-	};
-	var header = createHeader(method, api, '&status=' + status);
-	http.open(method, api);
-	http.setRequestHeader('Authorization', header);
-	http.onload = function() {
-	    Titanium.API.info(http.responseText);
-	    Titanium.API.info(http.status);
-	    if (http.status == 200) {
-	    	Ti.API.info(status);
-		    tableView.appendRow({title: status});
-	    } else {
-	    	httpError(http);
-	    }
-	};
-	http.send(param);
+    var method = 'POST';
+    var api = 'https://api.twitter.com/1.1/statuses/update.json';
+    var d = new Date();
+    var status = String.format('%s%s%s', addZero(d.getHours()), addZero(d.getMinutes()), addZero(d.getSeconds()));
+    var param = {
+        'status': status
+    };
+    var header = createHeader(method, api, '&status=' + status);
+    http.open(method, api);
+    http.setRequestHeader('Authorization', header);
+    http.onload = function() {
+    Titanium.API.info(http.responseText);
+    Titanium.API.info(http.status);
+    if (http.status == 200) {
+        Ti.API.info(status);
+        tableView.appendRow({title: status});
+    } else {
+        httpError(http);
+    }
+    };
+    http.send(param);
 });
 
+// OAuth用のheaderを作る
+function createHeader(method, api, omake) {
+	var d = parseInt((new Date)/1000);
+	var nonce = hex_sha1(parseInt(d + Math.random() * 100));
+	
+	var base_string = method + '&' + encodeURIComponent(api) + '&' + encodeURIComponent('oauth_consumer_key=' +　consumer_key + '&oauth_nonce=' + nonce + '&oauth_signature_method=HMAC-SHA1&oauth_timestamp=' + d + '&oauth_token=' + access_token + '&oauth_version=1.0' + omake);
+	b64pad = '=';
+	var signature = encodeURIComponent(b64_hmac_sha1(consumer_secret + '&' + access_token_secret, base_string));
+	var header = 'OAuth oauth_consumer_key="' +　consumer_key + '", oauth_nonce="' + nonce + '", oauth_signature="' + signature + '", oauth_signature_method="HMAC-SHA1", oauth_timestamp="' + d + '", oauth_token="' + access_token + '", oauth_version="1.0"';
+	Ti.API.info(base_string);
+	Ti.API.info(header);
+	return header;
+}
+
+// twitterのAPIがエラーを返したらダイアログ表示
 function httpError(http) {
     var json = JSON.parse(http.responseText);
 	Ti.UI.createAlertDialog({
 		title: String.format('http status is %d', http.status),
 		message: json.errors[0].message
-    }).show();    	
-	
+    }).show();	
 }
+
 function addZero (i) {
 	if (i < 10) {
 		return '0' + String(i);
 	}
 	return String(i);
 }
+
 //
 // create controls tab and root window
 //
