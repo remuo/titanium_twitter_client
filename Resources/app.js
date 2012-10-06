@@ -32,6 +32,8 @@ var access_token = '856356996-K7MFEJvjXCG4AMvIrY2Nw9mSw0BwKQoNBGkfCFxR';
 var access_token_secret = 'Ub9dv17MxL6tNElvnta8oI2jeks7Uz8W1M6Aes01MCU';
 //
 
+var data = {};
+
 var method = 'GET';
 var api = 'https://api.twitter.com/1.1/statuses/home_timeline.json';	
 
@@ -44,10 +46,11 @@ http.onload = function() {
     Titanium.API.info(http.status);
     Titanium.API.info(http.responseText);
     if (http.status == 200) {
-	    tableView.data = json.map(function(tweet) {
+	    data = json.map(function(tweet) {
 	    	Titanium.API.info(tweet.text);
 	        return({title: tweet.text});
 	    });
+	    tableView.data = data;
     } else {
     	httpError(http);
     }
@@ -67,14 +70,14 @@ tableView.addEventListener('click', function (ev) {
     http.open(method, api);
     http.setRequestHeader('Authorization', header);
     http.onload = function() {
-    Titanium.API.info(http.responseText);
-    Titanium.API.info(http.status);
-    if (http.status == 200) {
-        Ti.API.info(status);
-        tableView.appendRow({title: status});
-    } else {
-        httpError(http);
-    }
+	    Titanium.API.info(http.status);
+	    if (http.status == 200) {
+	        Ti.API.info(status);
+	        data.unshift({title: status});
+	        tableView.data = data;
+	    } else {
+	        httpError(http);
+	    }
     };
     http.send(param);
 });
